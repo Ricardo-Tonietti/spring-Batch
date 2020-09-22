@@ -15,13 +15,13 @@ import java.util.List;
 public class CarroItemReader implements ItemReader<CarroDto>, StepExecutionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CarroItemReader.class);
-    private Iterator<CarroDto> carroInIntgerator;
+    private Iterator<CarroDto> carroInIterator;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
         ExecutionContext ec = stepExecution.getJobExecution().getExecutionContext();
         List<CarroDto> carroDtoList = (List<CarroDto>) ec.get("carroInList");
-        this.carroInIntgerator = carroDtoList.iterator();
+        this.carroInIterator = carroDtoList.iterator();
         LOGGER.info("Iniciando o READER ...");
     }
 
@@ -33,8 +33,8 @@ public class CarroItemReader implements ItemReader<CarroDto>, StepExecutionListe
 
     @Override
     public CarroDto read() {
-        if(this.carroInIntgerator != null && this.carroInIntgerator.hasNext()){
-            return this.carroInIntgerator.next();
+        if(this.carroInIterator != null && this.carroInIterator.hasNext()){
+            return this.carroInIterator.next();
         }
         return null;
     }

@@ -14,14 +14,14 @@ import org.springframework.batch.repeat.RepeatStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CarroValidateTasklet implements Tasklet, StepExecutionListener {
+public class CarroValidateTasklet implements Tasklet, StepExecutionListener  {
 
-   private List<CarroDto> carroDtoList;
-   private String fileName;
+    private List<CarroDto> carroDtoList;
+    private String fileName;
 
-   public CarroValidateTasklet(){}
+    public CarroValidateTasklet() {}
 
-   public CarroValidateTasklet( String fileName) {
+    public CarroValidateTasklet(String fileName) {
         this.fileName = fileName;
     }
 
@@ -31,18 +31,10 @@ public class CarroValidateTasklet implements Tasklet, StepExecutionListener {
     }
 
     @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        stepExecution
-                .getJobExecution()
-                .getExecutionContext()
-                .put("carroInList", this.carroDtoList);
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        return ExitStatus.COMPLETED;
-    }
-
-    @Override
-    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         CsvFileUtils csvIn = new CsvFileUtils(this.fileName, true);
+
         CarroDto carroDto = csvIn.read();
 
         while (carroDto != null){
@@ -51,10 +43,24 @@ public class CarroValidateTasklet implements Tasklet, StepExecutionListener {
         }
 
         csvIn.closeReader();
+
         this.carroDtoList = CarroValidate.validate(this.carroDtoList);
+
         if(carroDtoList.isEmpty()){
             throw new RuntimeException("A lista de carros validos está vazia!");
         }
+
         return RepeatStatus.FINISHED;
+    }
+
+    @Override
+    public ExitStatus afterStep(StepExecution stepExecution) {
+
+        stepExecution
+                .getJobExecution()
+                .getExecutionContext()
+                .put("carroInList", this.carroDtoList);
+
+        return ExitStatus.COMPLETED;
     }
 }
